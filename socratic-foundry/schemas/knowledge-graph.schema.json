@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "socratic-foundry/knowledge-graph.schema.json",
+  "title": "Socratic Foundry knowledge graph",
+  "description": "도메인 지식그래프 (state.graph). 노드 타입·관계는 기획서 §14 를 따른다.",
+  "definitions": {
+    "nodeType": {
+      "type": "string",
+      "enum": ["Person", "Goal", "Value", "Experience", "Event", "Task", "PainPoint", "Cause",
+               "Workaround", "JudgmentSignal", "DomainRule", "Exception", "DomainAsset",
+               "Capability", "Customer", "Buyer", "Stakeholder", "Evidence", "Assumption",
+               "Contradiction", "Vulnerability", "Opportunity", "Solution", "Experiment", "Decision"]
+    },
+    "relType": {
+      "type": "string",
+      "enum": ["HAS_EXPERIENCE", "CONTAINS", "REVEALS", "CAUSED_BY", "CURRENTLY_SOLVED_BY",
+               "USES", "SUPPORTS", "HAS_EXCEPTION", "EXPERIENCES", "PAYS_FOR", "ENABLES",
+               "CREATES", "DEPENDS_ON", "TESTED_BY", "SUPPORTED_BY"]
+    },
+    "node": {
+      "type": "object",
+      "required": ["id", "type", "label"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^N[0-9]+$" },
+        "type": { "$ref": "#/definitions/nodeType" },
+        "label": { "type": "string", "minLength": 1 },
+        "detail": { "type": "string" },
+        "parentId": { "type": ["string", "null"], "description": "화면 트리 렌더용 계층. 의미 관계는 edges 가 담당." },
+        "status": {
+          "type": "string",
+          "enum": ["proposed", "confirmed", "partial", "needs_evidence", "has_exception", "explore_deeper"],
+          "description": "proposed = AI 제안(사용자 미확인). confirmed 외의 노드는 결론에 쓸 때 등급 강등."
+        },
+        "evidenceIds": { "type": "array", "items": { "type": "string" }, "description": "ledger ID (F/I/H) 또는 사건·규칙 ID" }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "required": ["from", "rel", "to"],
+      "properties": {
+        "from": { "type": "string" },
+        "rel": { "$ref": "#/definitions/relType" },
+        "to": { "type": "string" }
+      }
+    },
+    "graph": {
+      "type": "object",
+      "properties": {
+        "nodes": { "type": "array", "items": { "$ref": "#/definitions/node" } },
+        "edges": { "type": "array", "items": { "$ref": "#/definitions/edge" } }
+      }
+    }
+  },
+  "$ref": "#/definitions/graph"
+}

@@ -1,0 +1,228 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "socratic-foundry/interview-state.schema.json",
+  "title": "Socratic Foundry interview state",
+  "description": "세션 폴더의 state.json 스키마. SSOT 는 references/session-protocol.md — 이 파일은 기계 검증용 사본이다.",
+  "type": "object",
+  "required": ["version", "phase"],
+  "properties": {
+    "version": { "type": "integer", "minimum": 1 },
+    "phase": {
+      "type": "string",
+      "enum": ["contract", "values", "scenes", "economics", "mining", "graph", "capability",
+               "customers", "elenchus", "reframe", "audit", "portfolio", "validation", "report"]
+    },
+    "phases": { "type": "array", "items": { "type": "string" } },
+    "processing": { "type": "boolean" },
+    "notice": { "type": "string" },
+    "pendingAction": { "type": ["object", "null"] },
+
+    "session": {
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "mode": { "type": "string", "enum": ["", "quick", "standard", "deep", "challenge", "productize"] },
+        "purpose": { "type": "string" },
+        "goalType": { "type": "string", "enum": ["", "idea_validation", "problem_discovery", "productization"] },
+        "depthConsent": { "type": "string" },
+        "offLimits": { "type": "string" },
+        "desiredDecision": { "type": "string" },
+        "initialStatement": { "type": "string" },
+        "status": { "type": "string", "enum": ["interviewing", "deciding", "done"] }
+      }
+    },
+
+    "thread": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["role", "content"],
+        "properties": {
+          "role": { "type": "string", "enum": ["interviewer", "user"] },
+          "content": { "type": "string" },
+          "kind": { "type": "string", "enum": ["question", "answer", "summary", "probe"] },
+          "phase": { "type": "string" }
+        }
+      }
+    },
+    "currentQuestion": {
+      "type": ["object", "null"],
+      "required": ["text"],
+      "properties": {
+        "text": { "type": "string", "minLength": 1 },
+        "why": { "type": "string" },
+        "gate": { "type": "string" },
+        "options": {
+          "type": "array", "maxItems": 4,
+          "items": { "type": "object", "properties": {
+            "label": { "type": "string" }, "hint": { "type": "string" } } }
+        },
+        "allowMulti": { "type": "boolean" },
+        "inputType": { "type": "string", "enum": ["text", "scale"] },
+        "placeholder": { "type": "string" },
+        "allowSkip": { "type": "boolean" },
+        "allowExample": { "type": "boolean" },
+        "allowUnsure": { "type": "boolean" }
+      }
+    },
+
+    "ledger": { "$ref": "evidence.schema.json#/definitions/ledger" },
+    "abstractions": {
+      "type": "array",
+      "items": { "type": "object", "required": ["term"], "properties": {
+        "term": { "type": "string" }, "context": { "type": "string" },
+        "resolved": { "type": "boolean" }, "definition": { "type": "string" } } }
+    },
+    "decisions": {
+      "type": "array",
+      "items": { "type": "object", "required": ["id", "decision"], "properties": {
+        "id": { "type": "string", "pattern": "^D[0-9]+$" },
+        "decision": { "type": "string" }, "phase": { "type": "string" },
+        "basis": { "type": "string" } } }
+    },
+
+    "values": {
+      "type": "object",
+      "properties": {
+        "workStyle": { "type": "string" },
+        "priorities": { "type": "array", "items": { "type": "string" } },
+        "antiGoals": { "type": "array", "items": { "type": "string" } },
+        "customerDepth": { "type": "string", "enum": ["", "many_shallow", "few_deep", "undecided"] },
+        "teamPreference": { "type": "string", "enum": ["", "solo", "team", "undecided"] },
+        "successMinimum": { "type": "string" }
+      }
+    },
+
+    "events": {
+      "type": "array",
+      "items": { "type": "object", "required": ["id"], "properties": {
+        "id": { "type": "string", "pattern": "^E[0-9]+$" },
+        "title": { "type": "string" }, "when": { "type": "string" },
+        "doing": { "type": "string" }, "actors": { "type": "string" },
+        "tools": { "type": "string" }, "stuckAt": { "type": "string" },
+        "timeTaken": { "type": "string" }, "workaround": { "type": "string" },
+        "gaveUp": { "type": "string" }, "quote": { "type": "string" } } }
+    },
+
+    "pains": {
+      "type": "array",
+      "items": { "type": "object", "required": ["id", "description"], "properties": {
+        "id": { "type": "string", "pattern": "^P[0-9]+$" },
+        "eventIds": { "type": "array", "items": { "type": "string" } },
+        "description": { "type": "string" },
+        "frequencyPerMonth": { "type": ["number", "string"] },
+        "hoursPerOccurrence": { "type": ["number", "string"] },
+        "directCost": { "type": "string" }, "errorCost": { "type": "string" },
+        "delayCost": { "type": "string" }, "churnRisk": { "type": "string" },
+        "revenueLoss": { "type": "string" }, "qualityRisk": { "type": "string" },
+        "legalRisk": { "type": "string" }, "emotionalLoad": { "type": "string" },
+        "alreadyPaid": { "type": "string" }, "unlockedIfSolved": { "type": "string" },
+        "severityNote": { "type": "string" } } }
+    },
+
+    "judgmentRules": {
+      "type": "array",
+      "items": { "type": "object", "required": ["id", "rule"], "properties": {
+        "id": { "type": "string", "pattern": "^R[0-9]+$" },
+        "rule": { "type": "string" },
+        "signals": { "type": "array", "items": { "type": "string" } },
+        "example": { "type": "string" },
+        "exceptions": { "type": "array", "items": { "type": "string" } },
+        "noviceMistake": { "type": "string" }, "evidence": { "type": "string" },
+        "confidence": { "type": "string", "enum": ["experience", "talent", "unverified"] } } }
+    },
+
+    "assets": {
+      "type": "array",
+      "items": { "type": "object", "required": ["id", "description"], "properties": {
+        "id": { "type": "string", "pattern": "^A[0-9]+$" },
+        "kind": { "type": "string", "enum": ["experience", "data", "materials", "relationship", "trust", "skill"] },
+        "description": { "type": "string" }, "evidence": { "type": "string" },
+        "replicability": { "type": "string", "enum": ["hard", "medium", "easy"] } } }
+    },
+
+    "graph": { "$ref": "knowledge-graph.schema.json#/definitions/graph" },
+
+    "capabilities": {
+      "type": "array",
+      "items": { "type": "object", "required": ["area", "assessment"], "properties": {
+        "area": { "type": "string" }, "assessment": { "type": "string" },
+        "evidence": { "type": "string" }, "gapNote": { "type": "string" } } }
+    },
+
+    "stakeholders": {
+      "type": "object",
+      "properties": {
+        "problemHaver": { "type": "string" }, "user": { "type": "string" },
+        "beneficiary": { "type": "string" }, "buyer": { "type": "string" },
+        "approver": { "type": "string" }, "operator": { "type": "string" },
+        "dataProvider": { "type": "string" }, "blocker": { "type": "string" },
+        "buyerIsSufferer": { "type": ["boolean", "null"] },
+        "statusQuoWinner": { "type": "string" }, "accessPath": { "type": "string" },
+        "firstCustomer": { "type": "string" }
+      }
+    },
+
+    "claims": {
+      "type": "array",
+      "items": { "type": "object", "required": ["id", "claim"], "properties": {
+        "id": { "type": "string", "pattern": "^CL[0-9]+$" },
+        "claim": { "type": "string" },
+        "status": { "type": "string", "enum": ["open", "survived", "revised", "withdrawn"] },
+        "checks": { "type": "array", "items": { "type": "object", "properties": {
+          "kind": { "type": "string", "enum": ["definition", "consistency", "evidence", "alternative", "consequence"] },
+          "question": { "type": "string" }, "answer": { "type": "string" },
+          "verdict": { "type": "string", "enum": ["pass", "fail", "revised"] } } } } } }
+    },
+
+    "reframe": {
+      "type": "object",
+      "properties": {
+        "initialStatement": { "type": "string" },
+        "observedProblem": { "type": "string" },
+        "deeperProblem": { "type": "string" },
+        "opportunityStatement": { "type": "string" },
+        "userVerdict": { "type": ["string", "null"], "enum": ["approved", "revise", null] }
+      }
+    },
+
+    "vulnerabilities": {
+      "type": "array",
+      "items": { "type": "object", "required": ["id", "category", "description"], "properties": {
+        "id": { "type": "string", "pattern": "^V[0-9]+$" },
+        "category": { "type": "string" }, "description": { "type": "string" },
+        "severity": { "type": "string", "enum": ["high", "mid", "low"] },
+        "evidence": { "type": "string" }, "mitigation": { "type": "string" },
+        "isRiskiestAssumption": { "type": "boolean" } } }
+    },
+
+    "opportunities": { "type": "array", "items": { "$ref": "opportunity.schema.json#/definitions/opportunity" } },
+
+    "boundary": {
+      "type": "array",
+      "items": { "type": "object", "required": ["task", "mode"], "properties": {
+        "task": { "type": "string" },
+        "mode": { "type": "string", "enum": ["ai_only", "ai_draft_human_review", "human_decide_ai_execute", "co_work", "human_only", "automation_forbidden"] },
+        "reason": { "type": "string" } } }
+    },
+
+    "experiments": {
+      "type": "array",
+      "items": { "type": "object", "required": ["id", "title"], "properties": {
+        "id": { "type": "string", "pattern": "^X[0-9]+$" },
+        "title": { "type": "string" }, "riskiestAssumption": { "type": "string" },
+        "action": { "type": "string" }, "days": { "type": ["number", "string"] },
+        "target": { "type": "string" }, "metric": { "type": "string" },
+        "passCriteria": { "type": "string" }, "failCriteria": { "type": "string" },
+        "stopCriteria": { "type": "string" }, "cost": { "type": "string" },
+        "selected": { "type": "boolean" } } }
+    },
+
+    "gates": {
+      "type": "object",
+      "additionalProperties": { "type": "string", "enum": ["pending", "insufficient", "sufficient", "passed"] }
+    },
+    "gateReport": { "type": "string" },
+    "reportPath": { "type": "string" }
+  }
+}

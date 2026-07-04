@@ -1,0 +1,82 @@
+{
+  "$comment": "모순 탐지 규칙. machine_checks 는 verify-gate.py 가 기계 검사하고, heuristic_patterns 는 메인 Claude(신경망)가 인터뷰 중 감지에 쓰는 패턴 사전이다. 발견한 모순은 ledger.contradictions 에 기록하고 해소 질문을 던진다.",
+
+  "machine_checks": [
+    {
+      "id": "MC1",
+      "name": "금지 조건 위반 기회 선택",
+      "check": "values.antiGoals 의 항목이 선택된 opportunity 의 form 또는 pitch 에 그대로 등장하면 WARN",
+      "severity": "warn"
+    },
+    {
+      "id": "MC2",
+      "name": "구매자 미분리 기회",
+      "check": "opportunity.buyer 가 비어 있는데 selected=true 면 FAIL",
+      "severity": "fail"
+    },
+    {
+      "id": "MC3",
+      "name": "미해소 모순 잔존",
+      "check": "ledger.contradictions 에 status=open 이 남은 채 report 생성 시 WARN (사용자 고지 필수)",
+      "severity": "warn"
+    }
+  ],
+
+  "heuristic_patterns": [
+    {
+      "id": "HP1",
+      "a": "누구나 사용할 수 있어야 한다",
+      "b": "전문가 검수 없이는 위험하다",
+      "probe": "일반 사용자가 직접 쓰는 영역과 전문가 검수가 필요한 영역을 나눈다면 어떻게 구분할 수 있을까요?"
+    },
+    {
+      "id": "HP2",
+      "a": "맞춤형 서비스를 원한다",
+      "b": "대규모 확장을 원한다",
+      "probe": "맞춤과 확장 중 지금 6개월 동안은 어느 쪽이 우선입니까?"
+    },
+    {
+      "id": "HP3",
+      "a": "혼자 운영하고 싶다 (values.teamPreference=solo)",
+      "b": "운영 인력이 필요한 형태(서비스형 자동화·커뮤니티·플랫폼)를 선호",
+      "probe": "혼자 운영한다면 이 형태의 어떤 부분을 포기하거나 자동화해야 할까요?"
+    },
+    {
+      "id": "HP4",
+      "a": "깊은 소수 고객을 원한다 (values.customerDepth=few_deep)",
+      "b": "셀프서비스 SaaS·플랫폼 지향",
+      "probe": "깊은 고객 관계와 셀프서비스는 반대 방향입니다. 어느 쪽이 당신이 원하는 일의 방식에 가깝습니까?"
+    },
+    {
+      "id": "HP5",
+      "a": "시간이 없다 / 부업으로 한다",
+      "b": "긴 개발 기간이 필요한 형태(SaaS·플랫폼)를 첫 단계로 선택",
+      "probe": "주당 가용 시간으로 이 형태의 첫 버전까지 몇 주가 걸릴까요? 그보다 빨리 검증할 방법은 없을까요?"
+    },
+    {
+      "id": "HP6",
+      "a": "모든 판단을 AI 에게 맡기고 싶다",
+      "b": "오류가 생기면 되돌릴 수 없는 도메인(의료·법률·금융 등)",
+      "probe": "잘못된 판단이 발생했을 때 피해를 되돌릴 수 있습니까? 최종 책임은 누가 져야 합니까?"
+    },
+    {
+      "id": "HP7",
+      "a": "문제가 심각하다고 말함",
+      "b": "해결을 위해 돈이나 시간을 쓴 적이 없음",
+      "probe": "이 문제로 지금까지 돈을 쓰거나, 다른 일을 포기한 적이 있습니까? 없다면 왜일까요?"
+    },
+    {
+      "id": "HP8",
+      "a": "안정성이 최우선 (values.priorities 1위 = 안정성)",
+      "b": "검증 안 된 시장에 전업 투신 계획",
+      "probe": "안정성이 1순위라면, 현재 수입을 유지한 채 검증할 수 있는 경로부터 설계할까요?"
+    }
+  ],
+
+  "resolution_protocol": [
+    "1. 모순을 발견하면 ledger.contradictions 에 {id, a, b, status:open} 으로 기록한다.",
+    "2. 비난하지 않고 양쪽을 나란히 보여주며 구분 기준이나 우선순위를 묻는다 (probe 참고).",
+    "3. 사용자의 답으로 resolution 을 채우고 status:resolved 로 바꾼다.",
+    "4. 해소가 불가능하면 open 으로 남기되, 최종 보고서에 '미해소 긴장'으로 명시한다 (숨기지 않는다)."
+  ]
+}

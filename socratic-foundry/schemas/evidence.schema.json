@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "socratic-foundry/evidence.schema.json",
+  "title": "Socratic Foundry evidence ledger",
+  "description": "Evidence Panel 원장 (state.ledger). 사실·추론·가설·모순·공백을 절대 섞지 않는다 (기획서 §4.7 추적 가능성).",
+  "definitions": {
+    "fact": {
+      "type": "object",
+      "required": ["id", "content"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^F[0-9]+$" },
+        "content": { "type": "string", "minLength": 1 },
+        "source": { "type": "string", "description": "출처 — 'scenes#3'(스레드 위치), 'upload:파일명', 'user' 등" }
+      }
+    },
+    "inference": {
+      "type": "object",
+      "required": ["id", "content", "basis"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^I[0-9]+$" },
+        "content": { "type": "string", "minLength": 1 },
+        "basis": { "type": "array", "minItems": 1, "items": { "type": "string" },
+                   "description": "근거 ID 배열 — 최소 1개. 근거를 못 대면 inference 가 아니라 hypothesis" }
+      }
+    },
+    "hypothesis": {
+      "type": "object",
+      "required": ["id", "content"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^H[0-9]+$" },
+        "content": { "type": "string", "minLength": 1 },
+        "testedBy": { "type": "string", "description": "검증 실험 ID (X#) — 없으면 빈 문자열" }
+      }
+    },
+    "contradiction": {
+      "type": "object",
+      "required": ["id", "a", "b", "status"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^C[0-9]+$" },
+        "a": { "type": "string" },
+        "b": { "type": "string" },
+        "status": { "type": "string", "enum": ["open", "resolved"] },
+        "resolution": { "type": "string" }
+      }
+    },
+    "ledger": {
+      "type": "object",
+      "properties": {
+        "facts": { "type": "array", "items": { "$ref": "#/definitions/fact" } },
+        "inferences": { "type": "array", "items": { "$ref": "#/definitions/inference" } },
+        "hypotheses": { "type": "array", "items": { "$ref": "#/definitions/hypothesis" } },
+        "contradictions": { "type": "array", "items": { "$ref": "#/definitions/contradiction" } },
+        "gaps": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  },
+  "$ref": "#/definitions/ledger"
+}

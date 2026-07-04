@@ -1,0 +1,91 @@
+{
+  "$comment": "하드 게이트 통과 조건 (심볼릭 층). verify-gate.py 가 이 임계값으로 state.json 을 검사한다. 검사 로직 자체는 verify-gate.py 에 있고, 이 파일은 임계값·모드 정책만 담는다.",
+
+  "thresholds": {
+    "problem": {
+      "min_events": 2,
+      "event_required_fields": ["when", "doing", "stuckAt"],
+      "min_pains": 1,
+      "pain_requires_frequency": true,
+      "pain_loss_fields": ["directCost", "errorCost", "delayCost", "churnRisk", "revenueLoss", "qualityRisk", "legalRisk", "emotionalLoad"],
+      "pain_requires_workaround_in_events": true
+    },
+    "domain": {
+      "min_judgment_rules": 3,
+      "rule_requires_example": true,
+      "min_total_exceptions": 1,
+      "rule_requires_confidence": true,
+      "min_assets": 1
+    },
+    "customer": {
+      "required_fields": ["problemHaver", "user", "buyer", "firstCustomer", "accessPath"],
+      "buyer_is_sufferer_must_be_answered": true
+    },
+    "evidence": {
+      "min_facts": 3,
+      "opportunity_requires_grade": true,
+      "opportunity_requires_grade_why": true,
+      "unresolved_abstractions_block": true,
+      "open_contradictions_warn": true
+    },
+    "opportunity": {
+      "min_opportunities": 5,
+      "min_opportunities_quick": 2,
+      "min_distinct_forms": 3,
+      "require_non_saas_alternative": true,
+      "min_distinct_horizons": 3,
+      "selected_requires_fit_why": true
+    },
+    "value": {
+      "selected_requires_why_buy": true,
+      "selected_requires_asset_built": true
+    },
+    "sovereignty": {
+      "reframe_requires_user_approval": true,
+      "min_decisions": 2,
+      "boundary_requires_forbidden_zone": true,
+      "session_requires_desired_decision": true
+    },
+    "validation": {
+      "min_selected_experiments": 1,
+      "max_days": 14,
+      "experiment_required_fields": ["metric", "passCriteria", "failCriteria", "action", "target"]
+    }
+  },
+
+  "phase_gate_map": {
+    "$comment": "advance 시 --gate <phase> 로 호출하면 어느 하드 게이트를 검사하는가",
+    "scenes": ["problem_events"],
+    "economics": ["problem"],
+    "mining": ["domain"],
+    "customers": ["customer"],
+    "graph": [],
+    "capability": [],
+    "elenchus": [],
+    "reframe": [],
+    "audit": [],
+    "portfolio": ["opportunity", "evidence", "value"],
+    "validation": ["validation"],
+    "report": ["problem", "domain", "customer", "evidence", "opportunity", "value", "sovereignty", "validation"]
+  },
+
+  "modes": {
+    "$comment": "모드에 포함되지 않은 phase 의 게이트는 FAIL 대신 WARN 으로 강등된다. 짧은 모드도 게이트를 면제받지 않는다 — 규모만 줄인다.",
+    "quick": {
+      "warn_only_gates": ["problem", "customer", "value", "sovereignty", "validation"],
+      "min_opportunities_override": 2
+    },
+    "standard": {
+      "warn_only_gates": []
+    },
+    "deep": {
+      "warn_only_gates": []
+    },
+    "challenge": {
+      "warn_only_gates": ["domain"]
+    },
+    "productize": {
+      "warn_only_gates": ["problem", "validation"]
+    }
+  }
+}

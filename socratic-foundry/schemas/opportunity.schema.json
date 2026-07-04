@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "socratic-foundry/opportunity.schema.json",
+  "title": "Socratic Foundry opportunity",
+  "description": "기회 포트폴리오 항목 (state.opportunities[]). 3축 평가(잠재 가치·창업자 적합성·증거 신뢰도)와 근거 필드가 필수다 (기획서 §9·§11).",
+  "definitions": {
+    "opportunity": {
+      "type": "object",
+      "required": ["id", "name", "horizon", "form", "evidenceGrade"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^O[0-9]+$" },
+        "horizon": {
+          "type": "string",
+          "enum": ["now", "product", "automation", "scale", "option"],
+          "description": "now=즉시 수익형 / product=표준 상품형 / automation=자동화형 / scale=확장형 / option=장기 옵션형"
+        },
+        "form": {
+          "type": "string",
+          "enum": ["컨설팅", "진단 서비스", "교육 상품", "템플릿·콘텐츠", "서비스형 자동화",
+                   "내부 업무 도구", "AI 에이전트", "버티컬 SaaS", "데이터 상품", "커뮤니티",
+                   "플랫폼", "전략적 운영 모델"]
+        },
+        "name": { "type": "string", "minLength": 1 },
+        "pitch": { "type": "string", "description": "한 문단 — 무엇을 누구에게 왜" },
+        "targetCustomer": { "type": "string" },
+        "buyer": { "type": "string", "description": "돈을 내는 사람 — targetCustomer 와 다를 수 있음. 공란인 채 selected 금지" },
+        "valueScore": { "type": "integer", "minimum": 1, "maximum": 5, "description": "잠재 가치: 문제 크기·빈도·지불 가능성·반복 수익·확장성" },
+        "valueWhy": { "type": "string" },
+        "fitScore": { "type": "integer", "minimum": 1, "maximum": 5, "description": "창업자 적합성: 도메인 전문성·비대칭 자산·고객 접근성·실행 능력·개인 가치 적합" },
+        "fitWhy": { "type": "string" },
+        "evidenceGrade": { "type": "string", "enum": ["A", "B", "C", "D", "E"] },
+        "gradeWhy": { "type": "string", "description": "등급 근거 — 근거 없는 등급 금지" },
+        "whyBuy": { "type": "string", "description": "고객의 구매 이유 — 시간 절약 이외 가치 포함 (Value Gate)" },
+        "assetBuilt": { "type": "string", "description": "이 기회로 축적되는 자산 (데이터·사례·신뢰)" },
+        "requiredAssets": { "type": "array", "items": { "type": "string" }, "description": "필요한 비대칭 자산 ID (A#)" },
+        "biggestRisk": { "type": "string" },
+        "whyYou": { "type": "string", "description": "이 사람이 해결할 자격 — 판단 규칙(R#)·자산(A#) 연결" },
+        "selected": { "type": "boolean" }
+      }
+    }
+  },
+  "$ref": "#/definitions/opportunity"
+}

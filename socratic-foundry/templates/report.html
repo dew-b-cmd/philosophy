@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{SESSION_TITLE}} · Socratic Foundry 기획 보고서</title>
+<!--
+  Socratic Foundry — 종합 HTML 보고서 템플릿
+  {{…}} 플레이스홀더를 state.json 내용(렌더된 HTML 조각)으로 치환한다.
+  PDF: 브라우저 인쇄(⌘P) — print CSS 내장. 외부 리소스 0 (self-contained).
+  주장 표식: <span class="mk mk-fact">사실</span> / mk-infer 추론 / mk-hypo 가설 / mk-prop 제안 / mk-dec 결정
+  근거 ID: <code class="eid">F3</code>
+-->
+<style>
+  :root{
+    --bg:#FBF8F2;--surface:#FFFFFF;--surface-2:#F4EEE2;
+    --ink:#211C16;--ink-soft:#6A6051;--ink-faint:#9A8F7C;
+    --line:#E9E0CF;--line-strong:#D8CCB4;
+    --accent:#C2410C;--accent-deep:#9A3412;--accent-soft:#FBEADD;
+    --sprout:#2F7D4F;--sprout-soft:#E3F0E6;
+    --gold:#B45309;--gold-soft:#FBF0DA;
+    --blue:#2C5E8A;--blue-soft:#E4EEF6;
+    --violet:#6D5A9A;--violet-soft:#EDE9F5;
+    --danger:#B4231E;--danger-soft:#F9E3E1;
+    --radius:14px;--radius-sm:9px;
+    --shadow:0 1px 2px rgba(40,30,15,.04),0 8px 28px rgba(40,30,15,.06);
+    --maxw:860px;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+    --sans:"Pretendard","Pretendard Variable",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+  font-size:16px;line-height:1.7;letter-spacing:-0.003em;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px 110px}
+  a{color:var(--accent);text-decoration:none}
+
+  /* 히어로 */
+  .hero{background:
+    radial-gradient(1000px 360px at 78% -8%, rgba(194,65,12,.10), transparent 60%),
+    radial-gradient(800px 320px at 8% 4%, rgba(47,125,79,.09), transparent 55%),
+    linear-gradient(180deg,#FFFDF8,#FBF8F2);
+    border-bottom:1px solid var(--line);padding:56px 0 40px;margin-bottom:10px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;
+  color:var(--accent-deep);background:var(--accent-soft);border:1px solid #F3D4BE;
+  padding:5px 12px;border-radius:100px;margin-bottom:18px;font-weight:600}
+  h1{font-size:clamp(26px,4.6vw,40px);line-height:1.15;margin:0 0 14px;font-weight:850;letter-spacing:-0.025em}
+  .lede{font-size:17px;color:var(--ink-soft);max-width:640px;margin:0 0 18px}
+  .pill-row{display:flex;flex-wrap:wrap;gap:8px}
+  .pill{font-size:12.5px;color:var(--ink-soft);background:var(--surface);border:1px solid var(--line-strong);
+  padding:6px 13px;border-radius:100px;box-shadow:var(--shadow)}
+  .pill b{color:var(--ink)}
+
+  /* 최종 문장 */
+  .final{background:linear-gradient(135deg,#2A231B,#1C1611);color:#EEE3D0;border-radius:var(--radius);
+  padding:26px 28px;margin:26px 0;border:1px solid #3A3025;box-shadow:var(--shadow)}
+  .final .ft{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+  color:#C49A6E;font-weight:700;margin-bottom:12px}
+  .final p{margin:0 0 10px;font-size:15.5px;line-height:1.65;color:#DDD0BC}
+  .final b{color:#FFE9D2}
+  .final p:last-child{margin:0}
+
+  /* 섹션 */
+  section{padding-top:44px}
+  .sec-head{display:flex;align-items:baseline;gap:12px;margin-bottom:6px}
+  .sec-num{font-family:var(--mono);font-size:12.5px;color:var(--accent);font-weight:700;
+  background:var(--accent-soft);border-radius:7px;padding:3px 9px;border:1px solid #F3D4BE;white-space:nowrap}
+  h2{font-size:24px;line-height:1.2;margin:0;font-weight:820;letter-spacing:-0.02em}
+  h3{font-size:17.5px;margin:24px 0 10px;font-weight:750}
+  .sec-sub{color:var(--ink-soft);font-size:15px;margin:4px 0 18px;max-width:640px}
+  p{margin:0 0 14px}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px 22px;box-shadow:var(--shadow);margin:14px 0}
+  .grid{display:grid;gap:14px}.grid-2{grid-template-columns:repeat(2,1fr)}
+  .callout{border-radius:var(--radius);padding:15px 18px;margin:18px 0;border:1px solid var(--line);
+  font-size:15px;background:var(--surface);box-shadow:var(--shadow)}
+  .callout .tt{font-weight:800;display:block;margin-bottom:4px;font-size:14.5px}
+  .callout.key{border-left:4px solid var(--gold);background:linear-gradient(90deg,var(--gold-soft),var(--surface) 20%)}
+  .callout.key .tt{color:var(--gold)}
+  .callout.warn{border-left:4px solid var(--accent);background:linear-gradient(90deg,var(--accent-soft),var(--surface) 18%)}
+  .callout.warn .tt{color:var(--accent-deep)}
+  .callout.risk{border-left:4px solid var(--danger);background:linear-gradient(90deg,var(--danger-soft),var(--surface) 18%)}
+  .callout.risk .tt{color:var(--danger)}
+
+  /* 주장 표식 + 근거 ID */
+  .mk{font-size:10.5px;font-family:var(--mono);font-weight:700;padding:2px 8px;border-radius:100px;
+  margin-right:6px;white-space:nowrap;vertical-align:1px}
+  .mk-fact{background:var(--sprout-soft);color:var(--sprout)}
+  .mk-infer{background:var(--blue-soft);color:var(--blue)}
+  .mk-hypo{background:var(--gold-soft);color:var(--gold)}
+  .mk-prop{background:var(--violet-soft);color:var(--violet)}
+  .mk-dec{background:var(--accent-soft);color:var(--accent-deep)}
+  code.eid{font-family:var(--mono);font-size:.78em;background:var(--surface-2);color:var(--accent-deep);
+  padding:1px 6px;border-radius:5px;border:1px solid var(--line);white-space:nowrap}
+
+  /* 표 */
+  .tblw{overflow-x:auto;margin:16px 0;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+  table{border-collapse:collapse;width:100%;font-size:14px;background:var(--surface)}
+  th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--surface-2);font-weight:750;font-size:12.5px;white-space:nowrap}
+  tr:last-child td{border-bottom:none}
+
+  /* 재정의 층 비교 */
+  .reframe .layer{display:flex;gap:14px;align-items:flex-start;padding:13px 0;border-bottom:1px dashed var(--line-strong)}
+  .reframe .layer:last-child{border-bottom:none}
+  .reframe .ln{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--ink-faint);
+  width:92px;flex:0 0 92px;padding-top:3px}
+  .reframe .layer.deep .ln{color:var(--gold)}
+  .reframe .layer.opp .ln{color:var(--sprout)}
+  .reframe .lv{font-size:15px}
+
+  /* 지식그래프 트리 */
+  .gtree{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:18px 20px;box-shadow:var(--shadow);font-size:14px;line-height:1.9;overflow-x:auto}
+  .gtree ul{list-style:none;margin:0;padding-left:22px;border-left:1px dashed var(--line-strong)}
+  .gtree>ul{padding-left:0;border-left:none}
+  .gtree li{margin:2px 0}
+  .gtree .ntype{font-family:var(--mono);font-size:10px;color:var(--blue);background:var(--blue-soft);
+  padding:1px 7px;border-radius:100px;margin-right:6px}
+  .gtree .nst{font-family:var(--mono);font-size:10px;margin-left:6px;padding:1px 7px;border-radius:100px}
+  .nst.confirmed{background:var(--sprout-soft);color:var(--sprout)}
+  .nst.partial{background:var(--gold-soft);color:var(--gold)}
+  .nst.proposed,.nst.needs_evidence{background:var(--danger-soft);color:var(--danger)}
+  .nst.has_exception{background:var(--violet-soft);color:var(--violet)}
+
+  /* 기회 카드 */
+  .opp-card{position:relative;overflow:hidden;background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius);padding:20px 22px 18px;box-shadow:var(--shadow);margin:14px 0}
+  .opp-card .obar{position:absolute;top:0;left:0;width:100%;height:4px;background:var(--accent)}
+  .opp-card.h-now .obar{background:var(--sprout)}.opp-card.h-product .obar{background:var(--gold)}
+  .opp-card.h-automation .obar{background:var(--blue)}.opp-card.h-scale .obar{background:var(--accent)}
+  .opp-card.h-option .obar{background:var(--violet)}
+  .opp-card h3{margin:2px 0 6px}
+  .opp-card.selected{outline:2px solid var(--sprout);outline-offset:2px}
+  .bd{display:inline-block;font-size:10.5px;font-family:var(--mono);font-weight:700;
+  padding:2px 9px;border-radius:100px;margin:0 5px 4px 0;background:var(--surface-2);
+  color:var(--ink-soft);border:1px solid var(--line-strong)}
+  .bd.acc{background:var(--accent-soft);color:var(--accent-deep);border-color:#F3D4BE}
+  .bd.gold{background:var(--gold-soft);color:var(--gold);border-color:#EBD7A8}
+  .bd.green{background:var(--sprout-soft);color:var(--sprout);border-color:#BEDDC8}
+  .score-row{display:flex;gap:18px;flex-wrap:wrap;margin:8px 0;font-size:13px;color:var(--ink-soft)}
+  .dot-s{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--line-strong);margin-right:3px}
+  .dot-s.on{background:var(--gold)}
+  .grade{font-family:var(--mono);font-weight:800;font-size:13px;width:26px;height:26px;border-radius:8px;
+  display:inline-grid;place-items:center;margin-right:6px;vertical-align:middle}
+  .grade.gA{background:var(--sprout-soft);color:var(--sprout)}
+  .grade.gB{background:#E9F2E4;color:#4E7D3A}
+  .grade.gC{background:var(--gold-soft);color:var(--gold)}
+  .grade.gD{background:var(--accent-soft);color:var(--accent-deep)}
+  .grade.gE{background:var(--danger-soft);color:var(--danger)}
+  .kv{font-size:13.5px;color:var(--ink-soft);margin:3px 0}
+  .kv b{color:var(--ink);font-weight:700}
+
+  /* 게이트 결과 pre */
+  .gatepre{background:#272019;color:#EFE6D6;border-radius:var(--radius-sm);padding:16px 18px;
+  font-family:var(--mono);font-size:12.5px;line-height:1.7;overflow-x:auto;white-space:pre-wrap;border:1px solid #3A3025}
+
+  .foot{border-top:1px solid var(--line);margin-top:56px;padding:26px 0 8px;color:var(--ink-faint);font-size:13px}
+
+  /* 툴바 */
+  .toolbar{position:fixed;right:18px;bottom:18px;display:flex;gap:8px;z-index:50}
+  .toolbar button{font:inherit;font-weight:700;border:0;border-radius:10px;padding:11px 16px;cursor:pointer;
+  background:var(--accent);color:#fff;font-size:13.5px;box-shadow:var(--shadow)}
+  .toolbar button.ghost{background:var(--surface);color:var(--ink-soft);border:1px solid var(--line-strong)}
+
+  /* ---- print.css (PDF) ---- */
+  @media print{
+    :root{--shadow:none}
+    body{background:#fff;font-size:11.5pt}
+    .wrap{max-width:100%;padding:0 4mm}
+    .hero{padding:10mm 0 6mm;border-bottom:1pt solid #ccc;background:#fff}
+    .toolbar{display:none}
+    section{padding-top:8mm;break-inside:avoid-page}
+    .opp-card,.card,.callout,.gtree{break-inside:avoid;box-shadow:none}
+    .final{background:#211C16 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .mk,.bd,.grade,.nst,.ntype{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    a{color:inherit}
+    @page{margin:14mm 12mm}
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <button class="ghost" onclick="window.print()">인쇄 / PDF 저장</button>
+  <button class="ghost" onclick="location.href='one-page-brief.md'">MD 브리프</button>
+  <button onclick="location.href='prd.md'">PRD 열기</button>
+  <!-- PRD 미생성(비제품형 기회) 세션에서는 위 'PRD 열기' 버튼을 제거하고 렌더한다 -->
+</div>
+
+<header class="hero"><div class="wrap" style="padding-bottom:0">
+  <div class="eyebrow">⚒ SOCRATIC FOUNDRY · 기획 보고서</div>
+  <h1>{{SESSION_TITLE}}</h1>
+  <p class="lede">{{OPPORTUNITY_STATEMENT}}</p>
+  <div class="pill-row">
+    <span class="pill">모드 <b>{{MODE}}</b></span>
+    <span class="pill">생성 <b>{{DATE}}</b></span>
+    <span class="pill">게이트 <b>{{GATE_SUMMARY}}</b></span>
+    <span class="pill">사실 <b>{{FACT_COUNT}}</b> · 추론 <b>{{INFER_COUNT}}</b> · 가설 <b>{{HYPO_COUNT}}</b></span>
+  </div>
+</div></header>
+
+<div class="wrap">
+
+<div class="final">
+  <div class="ft">Final Thesis — 최종 문장</div>
+  {{FINAL_SIX_LINES_HTML}}
+  <!-- <p>당신이 처음 만들고 싶다고 말한 것은 <b>…</b>이었습니다.</p> × 6줄 -->
+</div>
+
+<section id="reframe">
+  <div class="sec-head"><span class="sec-num">GATE 9</span><h2>문제 재정의</h2></div>
+  <p class="sec-sub">해결책을 내려놓고 발견한 진짜 문제. 사용자 승인: {{REFRAME_VERDICT}}</p>
+  <div class="card reframe">
+    <div class="layer"><span class="ln">최초 진술</span><span class="lv">{{INITIAL_STATEMENT}}</span></div>
+    <div class="layer"><span class="ln">관찰된 문제</span><span class="lv">{{OBSERVED_PROBLEM}}</span></div>
+    <div class="layer deep"><span class="ln">더 깊은 문제</span><span class="lv"><b>{{DEEPER_PROBLEM}}</b></span></div>
+    <div class="layer opp"><span class="ln">사업 기회</span><span class="lv">{{OPPORTUNITY_STATEMENT}}</span></div>
+  </div>
+</section>
+
+<section id="scenes">
+  <div class="sec-head"><span class="sec-num">GATE 2·3</span><h2>실제 장면과 고통의 경제성</h2></div>
+  <p class="sec-sub">진술이 아니라 사건. 모든 장면은 <span class="mk mk-fact">사실</span> 입니다.</p>
+  {{EVENTS_CARDS}}
+  {{PAINS_TABLE_HTML}}
+  <div class="callout key"><span class="tt">가장 비싼 문제</span>{{MOST_EXPENSIVE_PROBLEM}}</div>
+</section>
+
+<section id="mining">
+  <div class="sec-head"><span class="sec-num">GATE 4</span><h2>판단 규칙과 비대칭 자산</h2></div>
+  <p class="sec-sub">"감으로 안다"를 분해한 결과 — 이 사람이 해결할 자격의 근거.</p>
+  {{JUDGMENT_RULES_CARDS}}
+  {{ASSETS_CARDS}}
+</section>
+
+<section id="graph">
+  <div class="sec-head"><span class="sec-num">GATE 5</span><h2>도메인 지식그래프</h2></div>
+  <p class="sec-sub">confirmed 노드만 결론에 사용했습니다. 미확인 노드는 상태를 그대로 표시합니다.</p>
+  <div class="gtree">{{GRAPH_TREE_HTML}}</div>
+</section>
+
+<section id="people">
+  <div class="sec-head"><span class="sec-num">GATE 6·7</span><h2>역량 · 고객 · 구매자</h2></div>
+  {{CAPABILITIES_HTML}}
+  {{STAKEHOLDERS_TABLE}}
+</section>
+
+<section id="elenchus">
+  <div class="sec-head"><span class="sec-num">GATE 8</span><h2>논박에서 살아남은 것</h2></div>
+  <p class="sec-sub">정의 · 일관성 · 근거 · 대안 · 귀결 — 다섯 검토를 통과한 주장만 기획에 들어갑니다.</p>
+  {{ELENCHUS_HTML}}
+  {{CONTRADICTIONS_HTML}}
+</section>
+
+<section id="audit">
+  <div class="sec-head"><span class="sec-num">GATE 10</span><h2>취약점 감사</h2></div>
+  {{VULNERABILITIES_HTML}}
+  <div class="callout risk"><span class="tt">가장 위험한 가설</span>{{RISKIEST_HYPOTHESIS}}</div>
+</section>
+
+<section id="portfolio">
+  <div class="sec-head"><span class="sec-num">GATE 11</span><h2>기회 포트폴리오</h2></div>
+  <p class="sec-sub">서로 다른 시간축의 기회들. 증거 등급 D·E 는 '검증이 먼저'라는 뜻입니다.</p>
+  {{OPPORTUNITY_CARDS}}
+</section>
+
+<section id="boundary">
+  <div class="sec-head"><span class="sec-num">HUMAN×AI</span><h2>인간과 AI 의 업무 경계</h2></div>
+  {{BOUNDARY_TABLE_HTML}}
+</section>
+
+<section id="validation">
+  <div class="sec-head"><span class="sec-num">VALIDATE</span><h2>검증 실험과 실행 계획</h2></div>
+  {{EXPERIMENTS_HTML}}
+  <div class="callout key"><span class="tt">7일 행동</span>{{SEVEN_DAY_ACTION}}</div>
+  <div class="callout warn"><span class="tt">중단 · 전환 기준</span>{{STOP_OR_PIVOT}}</div>
+</section>
+
+<section id="prd">
+  <div class="sec-head"><span class="sec-num">PRD</span><h2>제품 요구사항 문서 — 개발 착수용</h2></div>
+  <p class="sec-sub">기획의 끝은 통찰이 아니라 명세입니다. 아래는 PRD 요약이며 전문은 <a href="prd.md"><code>prd.md</code></a> 입니다 — 그 파일 하나로 개발이 시작됩니다.</p>
+  {{PRD_SECTION}}
+  <!-- PRD 요약을 렌더: ① 개발 착수 조건(게이트 표 — callout.risk) ② Must 기능 표(ID·기능·완료 기준)
+       ③ 화면 목록 한 줄 요약 ④ 백로그 Phase 개요(Epic 수·Task 수). 비제품형 기회면 이 섹션 전체를
+       "선택 기회가 제품형이 아니라 PRD 를 생략했습니다" callout 으로 대체 -->
+  <div class="callout key"><span class="tt">다음 단계 — 이 보고서를 들고 무엇을 하는가</span>{{NEXT_STEPS_HTML}}
+  <!-- 두 경로 분기를 항상 보여준다:
+       경로 A (기본): 검증 게이트 통과 → prd.md 를 개발자/AI 코딩 도구에 주고 "Phase 1 백로그 구현" 지시 — 별도 도구 불필요.
+       경로 B (옵션): vibelabs 스킬팩 보유 시 /screen-spec → /tasks-generator → /auto-orchestrate 로 태스크 분해·자동 빌드.
+       어느 경로든 개발 착수 조건(검증 게이트)이 선행함을 명시 -->
+  </div>
+</section>
+
+<section id="appendix">
+  <div class="sec-head"><span class="sec-num">APPENDIX</span><h2>증거 원장 · 게이트 검사</h2></div>
+  {{LEDGER_HTML}}
+  <h3>하드 게이트 검사 결과</h3>
+  <div class="gatepre">{{GATE_REPORT}}</div>
+  {{OPEN_TENSIONS_HTML}}
+</section>
+
+<footer class="foot">
+  Socratic Foundry · 모든 데이터는 로컬 세션 폴더에만 저장됩니다 ·
+  <span class="mk mk-fact">사실</span><span class="mk mk-infer">추론</span><span class="mk mk-hypo">가설</span><span class="mk mk-prop">제안</span><span class="mk mk-dec">결정</span>
+  — 모든 주장은 표식과 근거 ID 로 추적 가능합니다.
+</footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,65 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "socratic-foundry/report.schema.json",
+  "title": "Socratic Foundry report contract",
+  "description": "최종 산출물 계약. 문서 자체는 Markdown/HTML 이지만, 이 스키마는 '어떤 섹션이 반드시 있어야 하는가'를 기계 가독 형태로 못박는다. critic 역할이 report 생성 후 이 목록으로 완결성을 점검한다.",
+  "type": "object",
+  "properties": {
+    "onePageBrief": {
+      "type": "object",
+      "description": "one-page-brief.md — One-page Opportunity Thesis 15항목. 모든 항목에 근거 ID(F/I/H/E/P/R/A/O/X/D) 표기.",
+      "required": [
+        "desiredLifeAndDirection", "hiddenDomain", "mostExpensiveProblem", "problemScenes",
+        "judgmentRules", "whyThisPerson", "firstCustomer", "actualBuyer", "purchasedValue",
+        "recommendedForm", "humanAiRoles", "riskiestHypothesis", "minimalExperiment",
+        "sevenDayAction", "stopOrPivotCriteria"
+      ],
+      "properties": {
+        "desiredLifeAndDirection": { "type": "string", "description": "사용자가 원하는 삶과 사업 방향" },
+        "hiddenDomain": { "type": "string", "description": "숨겨진 핵심 도메인" },
+        "mostExpensiveProblem": { "type": "string", "description": "가장 비싼 문제" },
+        "problemScenes": { "type": "string", "description": "문제를 보여주는 실제 장면 (E# 인용)" },
+        "judgmentRules": { "type": "string", "description": "사용자의 판단 규칙 (R#)" },
+        "whyThisPerson": { "type": "string", "description": "이 사람이 해결할 자격이 있는 이유" },
+        "firstCustomer": { "type": "string" },
+        "actualBuyer": { "type": "string" },
+        "purchasedValue": { "type": "string", "description": "고객이 구매하는 가치 (시간 절약 이외 포함)" },
+        "recommendedForm": { "type": "string", "description": "권장 상품 형태 + 장기 확장 방향" },
+        "humanAiRoles": { "type": "string", "description": "인간과 AI 의 역할 (automation_forbidden 포함)" },
+        "riskiestHypothesis": { "type": "string" },
+        "minimalExperiment": { "type": "string", "description": "최소 검증 실험 (X#, ≤14일, 지표·실패 기준)" },
+        "sevenDayAction": { "type": "string", "description": "7일 행동 — 누가·언제·무엇을·완료 기준" },
+        "stopOrPivotCriteria": { "type": "string", "description": "중단 또는 전환 기준" }
+      }
+    },
+    "outputFiles": {
+      "type": "array",
+      "description": "outputs/ 에 생성되어야 할 파일 목록 (quick 모드는 one-page-brief.md + interview-transcript.md 만)",
+      "items": {
+        "type": "string",
+        "enum": ["one-page-brief.md", "full-planning-report.md", "report.html",
+                 "evidence-ledger.md", "painpoint-map.md", "opportunity-portfolio.md",
+                 "human-ai-boundary.md", "validation-plan.md", "interview-transcript.md"]
+      }
+    },
+    "claimMarking": {
+      "type": "object",
+      "description": "full-planning-report.md 의 주장 표식 규칙",
+      "properties": {
+        "markers": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["[사실]", "[추론]", "[가설]", "[제안]", "[결정]"] }
+        },
+        "rule": {
+          "type": "string",
+          "const": "모든 주요 주장은 5분류 중 하나로 표시하고 근거 ID 를 괄호로 병기한다. 예: [추론] 의료진의 표현 규칙이 문서화되어 있지 않다 (F2, F5 → I3)"
+        }
+      }
+    },
+    "gateReportRequired": {
+      "type": "boolean",
+      "const": true,
+      "description": "report 생성 전 verify-gate.py --all 실행 결과가 gate-report.txt 로 존재해야 한다"
+    }
+  }
+}
